@@ -1,0 +1,23 @@
+{
+  "name": "@2enter/web-kit",
+  "module": "index.ts",
+  "type": "module",
+  "author": "davilivob <davilivob@gmail.com>",
+  "version": "0.1.6",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/validator": "^13.12.2",
+    "prettier": "^3.4.2",
+    "svelte": "^5.19.3",
+    "validator": "^13.12.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "exports": {
+    "./calc": "./src/calc/index.ts",
+    "./runtime": "./src/runtime/index.ts",
+    "./types": "./src/types.ts",
+    "./config": "./src/config/index.ts"
+  }
+}
