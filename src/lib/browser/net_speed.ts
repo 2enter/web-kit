@@ -3,7 +3,7 @@ import type { ConfigOptions, Results } from '@cloudflare/speedtest';
 
 class SpeedTester {
 	tester: SpeedTest;
-	results = $state<Results>();
+	results?: Results;
 
 	constructor(args: { configs?: ConfigOptions; onFinish: (result: Results) => any }) {
 		const { configs, onFinish } = args;
