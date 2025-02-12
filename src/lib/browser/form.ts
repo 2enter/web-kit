@@ -1,5 +1,56 @@
 import type { ActionResult, SubmitFunction } from '@sveltejs/kit';
-import type { Prettify } from '../types.ts';
+import type { Prettify } from '@/types';
+
+interface AppState {
+	startProcess: () => void;
+	endProcess: () => void;
+	popError: (error: any) => void;
+}
+
+function makeSubmit(config: {
+	process: () => Promise<string | undefined>;
+	state?: AppState;
+	preStart?: () => void;
+	onStart?: () => void;
+	preFinish?: () => void;
+	onFinish?: () => void;
+	validate?: () => boolean;
+	onError?: (error: string) => void;
+	preError?: (error: string) => void;
+	confirmMessage?: string;
+}) {
+	const {
+		state,
+		confirmMessage,
+		onStart,
+		onFinish,
+		onError,
+		preError,
+		preStart,
+		preFinish,
+		process,
+		validate
+	} = config;
+	return async () => {
+		if (!(validate?.() ?? true) || confirmMessage ? confirm(confirmMessage) : false) return;
+
+		preStart?.();
+		state?.startProcess();
+		onStart?.();
+
+		const error = await process();
+
+		if (error) {
+			preError?.(error);
+			state?.popError(error);
+			onError?.(error);
+		}
+
+		preFinish?.();
+		state?.endProcess();
+		onFinish?.();
+	};
+}
 
 /**
  * @typeParam ResultData -
@@ -49,4 +100,4 @@ function makeEnhanceHandler<ResultData>(args: {
 	};
 }
 
-export { makeEnhanceHandler };
+export { makeEnhanceHandler, makeSubmit };

@@ -1,11 +1,11 @@
-interface Trigger {
+type Trigger = {
 	runOnStart?: boolean;
 	check?: () => boolean;
 	action: () => any;
-}
+};
 
 class Timer {
-	readonly interval: NodeJS.Timer;
+	readonly interval: number;
 	readonly triggers: Trigger[];
 
 	startAt = $state(0);
@@ -55,4 +55,4 @@ class Timer {
 }
 
 export { Timer };
-export type { Trigger }
+export type { Trigger };
