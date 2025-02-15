@@ -1,13 +1,13 @@
 {
 	"name": "@2enter/web-kit",
-	"version": "0.4.8",
+	"version": "0.4.10",
 	"author": "davilivob <davilivob@gmail.com>",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/2enter-studio/web-kit.git"
+		"url": "git+https://github.com/2enter/web-kit.git"
 	},
 	"bugs": {
-		"url": "https://github.com/2enter-studio/web-kit/issues"
+		"url": "https://github.com/2enter/web-kit/issues"
 	},
 	"scripts": {
 		"dev": "vite dev",
