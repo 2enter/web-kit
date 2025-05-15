@@ -4,8 +4,11 @@ type Trigger = {
 	action: () => any;
 };
 
+/**
+ * @deprecated Use cron instead
+ */
 class Timer {
-	readonly interval: number;
+	readonly interval: NodeJS.Timeout;
 	readonly triggers: Trigger[];
 
 	startAt = $state(0);

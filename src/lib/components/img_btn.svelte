@@ -9,7 +9,14 @@
 		class?: string;
 	}
 
-	let { class: className, src, onclick = () => {}, ontouchstart, ontouchend, ...others }: Props = $props();
+	let {
+		class: className,
+		src,
+		onclick = () => {},
+		ontouchstart,
+		ontouchend,
+		...others
+	}: Props = $props();
 
 	let img = $state<HTMLImageElement>();
 
@@ -33,5 +40,5 @@
 		ontouchend?.();
 	}}
 >
-	<img bind:this={img} {src} alt="" class="w-full transition-transform duration-100" />
+	<enhanced:img bind:this={img} {src} alt="" class="w-full transition-transform duration-100" />
 </button>

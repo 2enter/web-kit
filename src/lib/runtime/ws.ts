@@ -3,8 +3,8 @@ import { sleep } from './sleep';
 
 type Handler<T> = (data: T) => any;
 
-function makeWSClient<T>(args: { url: string; onmessage?: Handler<T>; onerror?: Handler<Event>; onopen?: Handler<Event>; onclose?: Handler<Event> }) {
-	const { url, onmessage, onerror, onopen, onclose } = args;
+function makeWSClient<T>(args: { url: string; onmessage?: Handler<T>; onerror?: Handler<Event>; onopen?: Handler<Event>; onclose?: Handler<Event>; autoReconnect?: boolean }) {
+	const { url, onmessage, onerror, onopen, onclose, autoReconnect } = args;
 	let ws = new WebSocket(url);
 
 	ws.onopen =
@@ -31,11 +31,13 @@ function makeWSClient<T>(args: { url: string; onmessage?: Handler<T>; onerror?: 
 			console.error(`ws error: ${e}`);
 		};
 
-	ws.onclose = async function (e) {
-		await onclose?.(e);
-		await sleep(3000);
-		ws = makeWSClient(args);
-	};
+	if (autoReconnect ?? true) {
+		ws.onclose = async function (e) {
+			await onclose?.(e);
+			await sleep(3000);
+			ws = makeWSClient(args);
+		};
+	}
 
 	return ws;
 }
