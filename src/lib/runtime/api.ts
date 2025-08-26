@@ -9,7 +9,7 @@ class Api {
 		this.fetcher = fetcher ?? axios;
 	}
 
-	async fetch<T>(config: AxiosRequestConfig, printError?: boolean) {
+	async fetch<T>(config: AxiosRequestConfig, printError = true) {
 		const result = await this.fetcher(config).then((res) => res.data as ApiResponse<T>);
 		if (printError && result.error) {
 			console.error(result.error);
