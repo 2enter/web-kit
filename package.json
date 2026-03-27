@@ -1,6 +1,6 @@
 {
 	"name": "@2enter/web-kit",
-	"version": "0.6.9",
+	"version": "0.8.4",
 	"author": "davilivob <davilivob@gmail.com>",
 	"repository": {
 		"type": "git",
@@ -12,6 +12,7 @@
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build && npm run prepack",
+		"publish": "bun run build && npm publish",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"prepack": "svelte-kit sync && svelte-package && publint",
