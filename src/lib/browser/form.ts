@@ -1,11 +1,5 @@
-import type { ActionResult, SubmitFunction } from '@sveltejs/kit';
-import type { Prettify } from '@/types';
-
-interface AppState {
-	startProcess: () => void;
-	endProcess: () => void;
-	popError: (error: any) => void;
-}
+import type { SubmitFunction } from '@sveltejs/kit';
+import type { AppState } from '$lib/types';
 
 function makeSubmit(config: {
 	process: () => Promise<string | undefined>;
@@ -42,6 +36,7 @@ function makeSubmit(config: {
 
 		if (error) {
 			preError?.(error);
+			state?.popDialog('error', error);
 			onError?.(error);
 		}
 
