@@ -42,7 +42,6 @@ function makeSubmit(config: {
 
 		if (error) {
 			preError?.(error);
-			state?.popError(error);
 			onError?.(error);
 		}
 
@@ -58,44 +57,87 @@ function makeSubmit(config: {
  * @param {Object} args.getFiles - A function to fetch files, which will append to formData
  * @see http://localhost:5173/packages/lib/#makeEnhanceHandler
  */
-function makeEnhanceHandler<ResultData>(args: {
-	handlers: Prettify<Partial<Record<ActionResult['type'], (data?: ResultData) => Promise<any>>>>;
+function makeEnhanceHandler<
+	Success extends Record<string, unknown>,
+	Failure extends Record<string, unknown>,
+	Error = Failure
+>(args: {
+	handlers: {
+		success?: (data: Success, status?: number) => Promise<any>;
+		failure?: (data: Failure, status?: number) => Promise<any>;
+		redirect?: (location: string, status?: number) => Promise<any>;
+		error?: (error: Error, status?: number) => Promise<any>;
+	};
+	sysState?: AppState;
 	getFiles?: () => Promise<{ name: string; file: File }[] | null>;
-	onstart?: () => void;
-	onfinish?: () => void;
-	validate?: () => any;
-	confirmMessage?: string;
-}): SubmitFunction {
-	const { handlers, getFiles, confirmMessage, validate, onstart, onfinish } = args;
+	preStart?: () => void; // before sysState.startProcess()
+	onStart?: () => void; // after sysState.startProcess()
+	preFinish?: () => void; // before sysState.endProcess()
+	onFinish?: () => void; // after sysState.endProcess()
+	validate?: () => string | null | undefined; // return error message if invalid
+	confirmMessage?: () => string; // return confirm message
+}): SubmitFunction<Success, Failure> {
+	const {
+		sysState,
+		handlers,
+		getFiles,
+		confirmMessage,
+		validate,
+		preStart,
+		onStart,
+		preFinish,
+		onFinish
+	} = args;
 
 	return async ({ cancel, formData }) => {
-		if (!(validate?.() ?? true) || confirmMessage ? confirm(confirmMessage) : false) {
-			cancel();
-			return;
-		}
-		onstart?.();
-
-		const files = await getFiles?.();
-
-		if (files) {
-			for (const { name, file } of files) {
-				formData.append(name, file, file.name);
+		if (validate) {
+			const message = validate();
+			if (message) {
+				sysState?.popDialog('error', message);
+				cancel();
+				return;
 			}
 		}
 
+		if (confirmMessage) {
+			if (!confirm(confirmMessage())) {
+				cancel();
+				return;
+			}
+		}
+
+		if (getFiles) {
+			const files = await getFiles();
+			if (files)
+				for (const { name, file } of files) {
+					formData.append(name, file, file.name);
+				}
+		}
 		return async ({ update, result }) => {
+			preStart?.();
+			sysState?.startProcess();
+			onStart?.();
+
 			await update({ reset: false });
-			onfinish?.();
 
-			const handler = handlers[result.type];
-			if (!handler) return;
-
-			if ('data' in result) {
-				const data = result.data as ResultData;
-				await handler(data);
-			} else {
-				await handler();
+			const handler = handlers[result.type] ?? async function () {};
+			if (handler) {
+				const { status } = result;
+				switch (result.type) {
+					case 'redirect':
+						await handler(result.location as any, status);
+						break;
+					case 'error':
+						await handler(result.error, status);
+						break;
+					default:
+						await handler(result.data as any, status);
+				}
 			}
+
+			preFinish?.();
+			sysState?.endProcess();
+			onFinish?.();
 		};
 	};
 }
